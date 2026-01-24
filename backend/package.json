@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "iShop backend server using Express and MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "cross-env PORT=5001 nodemon server.js",
+    "dev:force": "cross-env PORT=5001 node server.js"
+  },
+  "keywords": [],
+  "author": "Sitara",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.21.1",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.12"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.0"
+  }
+}

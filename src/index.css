@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global resets */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-gray-800 font-poppins;
+  background-color: #f9f9f9; /* subtle light Apple-gray */
+}
+button {
+  @apply transition ease-in-out duration-300;
+}
+
+button:hover {
+  opacity: 0.85;
+  transform: scale(1.03);
+}
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.hero-curve {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  background: white;
+  border-top-left-radius: 50% 30%;
+  border-top-right-radius: 50% 30%;
+}
+
+/* Hero Image Animation */
+@keyframes heroMove {
+  0% { transform: scale(1.05) translateY(0); }
+  50% { transform: scale(1.05) translateY(-10px); }
+  100% { transform: scale(1.05) translateY(0); }
+}
+
+.moving-hero {
+  animation: heroMove 6s ease-in-out infinite;
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-in {
+  from { transform: translateX(120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-fade-in { animation: fade-in 0.3s ease-out; }
+.animate-slide-in { animation: slide-in 0.4s ease-out; }
+
+/* Toast / Notification animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+.animate-fadeIn { animation: fadeIn 0.3s ease-out; }

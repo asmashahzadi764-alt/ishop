@@ -1,0 +1,4 @@
+{
+  "watch": ["server.js", "controllers", "routes", "models"],
+  "ignore": ["createAdmin.js", "initAdmin.js", "*.log", "uploads/**", "node_modules/**"]
+}
