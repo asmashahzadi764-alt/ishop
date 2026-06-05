@@ -7,12 +7,16 @@ const Imac = () => {
   useEffect(() => {
     const fetchImacs = async () => {
       try {
-        const response = await fetch("http://localhost:5001/api/products");
+        // ✅ FIX: localhost removed (works with Vercel + Render proxy)
+        const response = await fetch("/api/products");
         const data = await response.json();
 
         const imacProducts = data.filter(
-          (item) => item.category && item.category.toLowerCase().trim() === "imac"
+          (item) =>
+            item.category &&
+            item.category.toLowerCase().trim() === "imac"
         );
+
         setImacs(imacProducts);
       } catch (error) {
         console.error("Error fetching iMac products:", error);
@@ -20,19 +24,25 @@ const Imac = () => {
         setLoading(false);
       }
     };
+
     fetchImacs();
   }, []);
 
-  // ✅ Helper function to handle URL or uploaded file
+  // ✅ FIXED IMAGE HANDLING (production safe)
   const getImageUrl = (product) => {
-    if (!product.image && !product.imageFile) return "/images/placeholder.png"; // fallback
-    if (product.image && product.image.startsWith("http")) return product.image;
-    if (product.imageFile) return `http://localhost:5001${product.imageFile}`;
-    return `http://localhost:5001${product.image}`;
+    if (!product.image && !product.imageFile)
+      return "/images/placeholder.png";
+
+    if (product.image?.startsWith("http")) return product.image;
+
+    if (product.imageFile) return product.imageFile;
+
+    return product.image;
   };
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-16">
+
       {/* Banner */}
       <div
         className="w-full bg-cover bg-center rounded-3xl overflow-hidden shadow-lg relative mb-12"
@@ -48,7 +58,7 @@ const Imac = () => {
         </div>
       </div>
 
-      {/* Loading / Empty State */}
+      {/* Loading */}
       {loading ? (
         <p className="text-gray-500 text-lg animate-pulse mb-10">
           Loading iMac products...
@@ -77,12 +87,15 @@ const Imac = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
+
               <h3 className="font-semibold text-xl text-gray-800 mb-2">
                 {product.name}
               </h3>
+
               <p className="text-gray-500 text-sm mb-4 line-clamp-3">
                 {product.description}
               </p>
+
               <p className="text-blue-600 font-bold text-lg">
                 Rs. {product.price}
               </p>

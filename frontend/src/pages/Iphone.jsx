@@ -7,11 +7,14 @@ const Iphone = () => {
   useEffect(() => {
     const fetchIphones = async () => {
       try {
-        const response = await fetch("http://localhost:5001/api/products");
+        // ✅ FIX: localhost removed (works in production + Vite proxy)
+        const response = await fetch("/api/products");
         const data = await response.json();
 
         const filtered = data.filter(
-          (p) => p.category && p.category.toLowerCase().trim() === "iphone"
+          (p) =>
+            p.category &&
+            p.category.toLowerCase().trim() === "iphone"
         );
 
         setIphones(filtered);
@@ -25,19 +28,24 @@ const Iphone = () => {
     fetchIphones();
   }, []);
 
-  // ✅ Helper to get image URL (online or uploaded file)
+  // ✅ FIXED IMAGE HANDLING (production safe)
   const getImageUrl = (product) => {
-    if (!product.image && !product.imageFile) return "/images/placeholder.png"; // fallback
-    if (product.image && product.image.startsWith("http")) return product.image;
-    if (product.imageFile) return `http://localhost:5001${product.imageFile}`;
-    return `http://localhost:5001${product.image}`;
+    if (!product.image && !product.imageFile)
+      return "/images/placeholder.png";
+
+    if (product.image?.startsWith("http")) return product.image;
+
+    if (product.imageFile) return product.imageFile;
+
+    return product.image;
   };
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-16">
+
       {/* Banner */}
       <div
-        className="w-full bg-cover bg-center rounded-3xl overflow-hidden shadow-lg relative mb-12"
+        className="w-full bg-cover bg-center rounded-3xl overflow-hidden shadow-lg mb-12"
         style={{ backgroundImage: "url('/images/iphone-banner.jpg')" }}
       >
         <div className="bg-black bg-opacity-50 p-12 text-center">
@@ -50,7 +58,7 @@ const Iphone = () => {
         </div>
       </div>
 
-      {/* Loading / Empty State */}
+      {/* Loading */}
       {loading ? (
         <p className="text-gray-500 text-lg animate-pulse mb-10">
           Loading iPhone products...
@@ -79,12 +87,15 @@ const Iphone = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
+
               <h3 className="font-semibold text-xl text-gray-800 mb-2">
                 {product.name}
               </h3>
+
               <p className="text-gray-500 text-sm mb-4 line-clamp-3">
                 {product.description}
               </p>
+
               <p className="text-blue-600 font-bold text-lg">
                 Rs. {product.price}
               </p>
