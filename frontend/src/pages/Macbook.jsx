@@ -4,15 +4,21 @@ const Macbook = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const API = import.meta.env.VITE_API_URL; // ✅ Render / Production URL
+  // ✅ Safe API fallback (important for deployment)
+  const API =
+    import.meta.env.VITE_API_URL || "https://ishop-backend-a0gx.onrender.com";
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(`${API}/api/products`);
+
+        if (!response.ok) {
+          throw new Error("API response not OK");
+        }
+
         const data = await response.json();
 
-        // Filter MacBook products
         const filtered = data.filter(
           (p) =>
             p.category &&
@@ -22,26 +28,32 @@ const Macbook = () => {
         setProducts(filtered);
       } catch (error) {
         console.error("Error fetching MacBook products:", error);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [API]);
 
-  // ✅ Safe image handler (production ready)
+  // ✅ Safe image handler
   const getImageUrl = (product) => {
-    if (!product?.image && !product?.imageFile)
-      return "/images/placeholder.png";
+    if (!product) return "/images/placeholder.png";
 
-    if (product.image?.startsWith("http"))
+    if (product.image?.startsWith("http")) {
       return product.image;
+    }
 
-    if (product.imageFile)
+    if (product.imageFile) {
       return `${API}${product.imageFile}`;
+    }
 
-    return `${API}${product.image}`;
+    if (product.image) {
+      return `${API}${product.image}`;
+    }
+
+    return "/images/placeholder.png";
   };
 
   return (
@@ -69,19 +81,16 @@ const Macbook = () => {
         </p>
       ) : products.length === 0 ? (
         <div className="bg-white p-8 rounded-2xl shadow-md text-center max-w-md">
-          <h2 className="text-2xl font-semibold mb-2 text-gray-700">
+          <h2 className="text-2xl font-semibold text-gray-700">
             No MacBook Products Available
           </h2>
-          <p className="text-gray-500">
-            Currently, no MacBook products are listed. Please check back later.
-          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl px-4">
           {products.map((product) => (
             <div
               key={product._id}
-              className="bg-white rounded-3xl shadow-lg p-6 transform hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              className="bg-white rounded-3xl shadow-lg p-6 hover:scale-105 transition"
             >
               <div className="w-full h-60 overflow-hidden rounded-2xl mb-4">
                 <img
@@ -91,15 +100,9 @@ const Macbook = () => {
                 />
               </div>
 
-              <h3 className="font-semibold text-xl text-gray-800 mb-2">
-                {product.name}
-              </h3>
-
-              <p className="text-gray-500 text-sm mb-4 line-clamp-3">
-                {product.description}
-              </p>
-
-              <p className="text-blue-600 font-bold text-lg">
+              <h3 className="font-semibold text-xl">{product.name}</h3>
+              <p className="text-gray-500 text-sm">{product.description}</p>
+              <p className="text-blue-600 font-bold mt-2">
                 Rs. {product.price}
               </p>
             </div>

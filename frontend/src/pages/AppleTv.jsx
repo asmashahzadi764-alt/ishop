@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 
+const API =
+  import.meta.env.VITE_API_URL ||
+  "https://ishop-backend-a0gx.onrender.com";
+
 const AppleTv = () => {
   const [appleTVs, setAppleTVs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -7,13 +11,9 @@ const AppleTv = () => {
   useEffect(() => {
     const fetchAppleTVs = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products`
-        );
-
+        const response = await fetch(`${API}/api/products`);
         const data = await response.json();
 
-        // Filter Apple TV products
         const filtered = data.filter(
           (p) =>
             p.category &&
@@ -31,18 +31,18 @@ const AppleTv = () => {
     fetchAppleTVs();
   }, []);
 
-  // ✅ Safe image handler (production ready)
+  // ✅ safe image handler (production ready)
   const getImageUrl = (product) => {
-    if (!product.image && !product.imageFile)
+    if (!product?.image && !product?.imageFile)
       return "/images/placeholder.png";
 
-    if (product.image && product.image.startsWith("http"))
+    if (product.image?.startsWith("http"))
       return product.image;
 
     if (product.imageFile)
-      return `${import.meta.env.VITE_API_URL}${product.imageFile}`;
+      return `${API}${product.imageFile}`;
 
-    return `${import.meta.env.VITE_API_URL}${product.image}`;
+    return `${API}${product.image}`;
   };
 
   return (
@@ -50,14 +50,14 @@ const AppleTv = () => {
 
       {/* Banner */}
       <div
-        className="w-full bg-cover bg-center rounded-3xl overflow-hidden shadow-lg relative mb-12"
+        className="w-full bg-cover bg-center rounded-3xl overflow-hidden shadow-lg mb-12"
         style={{ backgroundImage: "url('/images/appletv-banner.jpg')" }}
       >
         <div className="bg-black bg-opacity-50 p-12 text-center">
           <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-4">
             Apple TV
           </h1>
-          <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-200">
             Stream, play, and experience entertainment like never before.
           </p>
         </div>
@@ -70,7 +70,7 @@ const AppleTv = () => {
         </p>
       ) : appleTVs.length === 0 ? (
         <div className="bg-white p-8 rounded-2xl shadow-md text-center max-w-md">
-          <h2 className="text-2xl font-semibold mb-2 text-gray-700">
+          <h2 className="text-2xl font-semibold text-gray-700 mb-2">
             No Apple TV Products Available
           </h2>
           <p className="text-gray-500">
@@ -79,10 +79,11 @@ const AppleTv = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl px-4">
+
           {appleTVs.map((product) => (
             <div
               key={product._id}
-              className="bg-white rounded-3xl shadow-lg p-6 transform hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              className="bg-white rounded-3xl shadow-lg p-6 hover:scale-105 transition"
             >
               <div className="w-full h-60 overflow-hidden rounded-2xl mb-4">
                 <img
@@ -105,6 +106,7 @@ const AppleTv = () => {
               </p>
             </div>
           ))}
+
         </div>
       )}
     </section>

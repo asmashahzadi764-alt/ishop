@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 
-const API_BASE = import.meta.env.VITE_API_URL 
-  || "https://ishop-backend-a0gx.onrender.com";
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "https://ishop-backend-a0gx.onrender.com";
 
 const Accessories = () => {
   const [accessories, setAccessories] = useState([]);
@@ -11,6 +12,11 @@ const Accessories = () => {
     const fetchAccessories = async () => {
       try {
         const response = await fetch(`${API_BASE}/api/products`);
+
+        if (!response.ok) {
+          throw new Error("API error");
+        }
+
         const data = await response.json();
 
         const filtered = data.filter(
@@ -22,6 +28,7 @@ const Accessories = () => {
         setAccessories(filtered);
       } catch (error) {
         console.error("Error fetching accessories:", error);
+        setAccessories([]);
       } finally {
         setLoading(false);
       }
@@ -30,20 +37,23 @@ const Accessories = () => {
     fetchAccessories();
   }, []);
 
-  // ✅ Image helper (production-safe)
+  // ✅ Safe image handler (same standard everywhere)
   const getImageUrl = (product) => {
-    if (!product.image && !product.imageFile)
-      return "/images/placeholder.png";
+    if (!product) return "/images/placeholder.png";
 
-    // Full URL already
-    if (product.image?.startsWith("http")) return product.image;
+    if (product.image?.startsWith("http")) {
+      return product.image;
+    }
 
-    // Uploaded file
-    if (product.imageFile)
+    if (product.imageFile) {
       return `${API_BASE}${product.imageFile}`;
+    }
 
-    // backend stored path
-    return `${API_BASE}${product.image}`;
+    if (product.image) {
+      return `${API_BASE}${product.image}`;
+    }
+
+    return "/images/placeholder.png";
   };
 
   return (
@@ -71,15 +81,14 @@ const Accessories = () => {
         </p>
       ) : accessories.length === 0 ? (
         <div className="bg-white p-8 rounded-2xl shadow-md text-center max-w-md">
-          <h2 className="text-2xl font-semibold mb-2 text-gray-700">
+          <h2 className="text-2xl font-semibold text-gray-700">
             No Accessories Available
           </h2>
-          <p className="text-gray-500">
+          <p className="text-gray-500 mt-2">
             Currently no accessories are listed.
           </p>
         </div>
       ) : (
-        // Products Grid
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl px-4">
 
           {accessories.map((product) => (
@@ -90,21 +99,21 @@ const Accessories = () => {
               <div className="w-full h-60 overflow-hidden rounded-2xl mb-4">
                 <img
                   src={getImageUrl(product)}
-                  alt={product.name}
+                  alt={product.name || "product"}
                   className="w-full h-full object-cover"
                 />
               </div>
 
-              <h3 className="font-semibold text-xl text-gray-800 mb-2">
-                {product.name}
+              <h3 className="font-semibold text-xl text-gray-800">
+                {product.name || "No name"}
               </h3>
 
-              <p className="text-gray-500 text-sm mb-4 line-clamp-3">
-                {product.description}
+              <p className="text-gray-500 text-sm mt-1 line-clamp-3">
+                {product.description || "No description"}
               </p>
 
-              <p className="text-blue-600 font-bold text-lg">
-                Rs. {product.price}
+              <p className="text-blue-600 font-bold text-lg mt-2">
+                Rs. {product.price ?? 0}
               </p>
             </div>
           ))}

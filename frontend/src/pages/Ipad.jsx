@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 
+const API =
+  import.meta.env.VITE_API_URL ||
+  "https://ishop-backend-a0gx.onrender.com";
+
 const Ipad = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const API = import.meta.env.VITE_API_URL; // ✅ Render / Production API
-
-  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch(`${API}/api/products`);
+
         const data = await res.json();
         setProducts(data || []);
       } catch (err) {
@@ -23,14 +25,14 @@ const Ipad = () => {
     fetchProducts();
   }, []);
 
-  // Filter iPad products
+  // filter iPads
   const ipadProducts = products.filter(
     (p) =>
       p.category &&
       p.category.toLowerCase().trim() === "ipad"
   );
 
-  // ✅ Safe image handler (production ready)
+  // safe image handler
   const getImageUrl = (product) => {
     if (!product?.image && !product?.imageFile)
       return "/images/placeholder.png";
@@ -49,14 +51,14 @@ const Ipad = () => {
 
       {/* Banner */}
       <div
-        className="w-full bg-cover bg-center rounded-3xl overflow-hidden shadow-lg relative mb-12"
+        className="w-full bg-cover bg-center rounded-3xl overflow-hidden shadow-lg mb-12"
         style={{ backgroundImage: "url('/images/ipad-banner.jpg')" }}
       >
         <div className="bg-black bg-opacity-50 p-12 text-center">
           <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-4">
             iPad Series
           </h1>
-          <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-200">
             Enjoy creativity and performance — your perfect tablet for work and play.
           </p>
         </div>
@@ -69,7 +71,7 @@ const Ipad = () => {
         </p>
       ) : ipadProducts.length === 0 ? (
         <div className="bg-white p-8 rounded-2xl shadow-md text-center max-w-md">
-          <h2 className="text-2xl font-semibold mb-2 text-gray-700">
+          <h2 className="text-2xl font-semibold text-gray-700 mb-2">
             No iPad Products Available
           </h2>
           <p className="text-gray-500">
@@ -78,10 +80,11 @@ const Ipad = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl px-4">
+
           {ipadProducts.map((product) => (
             <div
               key={product._id}
-              className="bg-white rounded-3xl shadow-lg p-6 transform hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              className="bg-white rounded-3xl shadow-lg p-6 hover:scale-105 transition"
             >
               <div className="w-full h-60 overflow-hidden rounded-2xl mb-4">
                 <img
@@ -104,6 +107,7 @@ const Ipad = () => {
               </p>
             </div>
           ))}
+
         </div>
       )}
     </section>

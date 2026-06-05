@@ -4,15 +4,24 @@ const AppleWatch = () => {
   const [watches, setWatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Render / Vercel / Local safe API
+  const API =
+    import.meta.env.VITE_API_URL ||
+    "https://ishop-backend-a0gx.onrender.com";
+
   useEffect(() => {
     const fetchWatches = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products`
-        );
+        const response = await fetch(`${API}/api/products`);
+
+        // ❗ safety check (avoid HTML crash)
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("API did not return JSON");
+        }
+
         const data = await response.json();
 
-        // Filter Apple Watch products
         const filtered = data.filter(
           (p) =>
             p.category &&
@@ -28,25 +37,28 @@ const AppleWatch = () => {
     };
 
     fetchWatches();
-  }, []);
+  }, [API]);
 
-  // ✅ Image handler (production safe)
+  // ✅ Image handler (100% production safe)
   const getImageUrl = (product) => {
-    if (!product.image && !product.imageFile)
+    if (!product?.image && !product?.imageFile)
       return "/images/placeholder.png";
 
-    if (product.image && product.image.startsWith("http"))
+    if (product.image?.startsWith("http"))
       return product.image;
 
     if (product.imageFile)
-      return `${import.meta.env.VITE_API_URL}${product.imageFile}`;
+      return `${API}${product.imageFile}`;
 
-    return `${import.meta.env.VITE_API_URL}${product.image}`;
+    if (product.image)
+      return `${API}${product.image}`;
+
+    return "/images/placeholder.png";
   };
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-16">
-      
+
       {/* Banner */}
       <div
         className="w-full bg-cover bg-center rounded-3xl overflow-hidden shadow-lg relative mb-12"
@@ -86,21 +98,21 @@ const AppleWatch = () => {
               <div className="w-full h-60 overflow-hidden rounded-2xl mb-4">
                 <img
                   src={getImageUrl(product)}
-                  alt={product.name}
+                  alt={product.name || "Apple Watch"}
                   className="w-full h-full object-cover"
                 />
               </div>
 
               <h3 className="font-semibold text-xl text-gray-800 mb-2">
-                {product.name}
+                {product.name || "No Name"}
               </h3>
 
               <p className="text-gray-500 text-sm mb-4 line-clamp-3">
-                {product.description}
+                {product.description || "No description available"}
               </p>
 
               <p className="text-blue-600 font-bold text-lg">
-                Rs. {product.price}
+                Rs. {product.price || 0}
               </p>
             </div>
           ))}
