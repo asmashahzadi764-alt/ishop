@@ -5,106 +5,129 @@ import path from "path";
 
 const router = express.Router();
 
-// -------------------------
-// Multer config for file uploads
-// -------------------------
+// =========================
+// MULTER CONFIG (UPLOADS)
+// =========================
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // uploads folder (create in root)
+    cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // unique filename
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
 const upload = multer({ storage });
 
-// -------------------------
-// GET All Products
-// -------------------------
+// =========================
+// GET ALL PRODUCTS
+// =========================
 router.get("/", async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
     res.status(200).json(products);
   } catch (err) {
-    console.error("Error fetching products:", err);
+    console.error("GET products error:", err);
     res.status(500).json({ message: "Failed to fetch products" });
   }
 });
 
-// -------------------------
-// POST New Product (File upload or URL)
-// -------------------------
+// =========================
+// ADD PRODUCT (FIXED)
+// =========================
 router.post("/", upload.single("imageFile"), async (req, res) => {
   try {
     const { name, price, description, category, image } = req.body;
 
-    let imagePath = image || ""; // default image from URL
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
+    // image logic (safe)
+    let imagePath = "";
+
     if (req.file) {
-      // if file uploaded, override image URL
       imagePath = `/uploads/${req.file.filename}`;
+    } else if (image) {
+      imagePath = image;
     }
 
-    if (!name || !price || !category || !imagePath) {
-      return res.status(400).json({ message: "Please fill all required fields" });
+    // validation (FIXED)
+    if (!name || !price || !category) {
+      return res.status(400).json({
+        message: "Name, price, category are required",
+      });
     }
 
     const newProduct = new Product({
       name,
       price,
       description,
-      category,
-      image: imagePath,
+      category: category.toLowerCase().trim(),
+      image: imagePath || "/uploads/default.png",
     });
 
     await newProduct.save();
-    res.status(201).json(newProduct);
+
+    res.status(201).json({
+      message: "Product created successfully",
+      product: newProduct,
+    });
   } catch (err) {
-    console.error("Error adding product:", err);
+    console.error("POST product error:", err);
     res.status(500).json({ message: "Server error while adding product" });
   }
 });
 
-// -------------------------
-// UPDATE Product by ID
-// -------------------------
+// =========================
+// UPDATE PRODUCT
+// =========================
 router.put("/:id", upload.single("imageFile"), async (req, res) => {
   try {
     const { name, price, description, category, image } = req.body;
 
-    let imagePath = image || "";
+    let imagePath = image;
+
     if (req.file) {
       imagePath = `/uploads/${req.file.filename}`;
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(
+    const updated = await Product.findByIdAndUpdate(
       req.params.id,
-      { name, price, description, category, image: imagePath },
+      {
+        name,
+        price,
+        description,
+        category: category?.toLowerCase().trim(),
+        image: imagePath,
+      },
       { new: true }
     );
 
-    if (!updatedProduct) {
+    if (!updated) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.status(200).json(updatedProduct);
+    res.json(updated);
   } catch (err) {
-    console.error("Error updating product:", err);
+    console.error("UPDATE error:", err);
     res.status(500).json({ message: "Failed to update product" });
   }
 });
 
-// -------------------------
-// DELETE Product by ID
-// -------------------------
+// =========================
+// DELETE PRODUCT
+// =========================
 router.delete("/:id", async (req, res) => {
   try {
     const deleted = await Product.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Product not found" });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
     res.json({ message: "Product deleted successfully" });
   } catch (err) {
-    console.error("Error deleting product:", err);
+    console.error("DELETE error:", err);
     res.status(500).json({ message: "Failed to delete product" });
   }
 });

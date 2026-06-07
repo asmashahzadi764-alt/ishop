@@ -17,13 +17,13 @@ const ManageProducts = () => {
   }, []);
 
   const fetchProducts = async () => {
-    const { data } = await axios.get("http://localhost:5000/api/products");
+    const { data } = await axios.get("http://localhost:5001/api/products");
     setProducts(data);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      await axios.delete(`http://localhost:5000/api/products/${id}`);
+      await axios.delete(`http://localhost:5001/api/products/${id}`);
       fetchProducts();
     }
   };
@@ -36,7 +36,7 @@ const ManageProducts = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     await axios.put(
-      `http://localhost:5000/api/products/${editProduct._id}`,
+      `http://localhost:5001/api/products/${editProduct._id}`,
       formData
     );
     alert("✅ Product updated successfully!");

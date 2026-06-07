@@ -49,7 +49,7 @@ const AddProduct = () => {
         formData.append("image", product.image);
       }
 
-      const response = await axios.post("http://localhost:5000/api/products", formData, {
+      const response = await axios.post("http://localhost:5001/api/products", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -173,7 +173,7 @@ const AddProduct = () => {
                   ? URL.createObjectURL(file)
                   : product.image.startsWith("http")
                   ? product.image
-                  : `http://localhost:5000${product.image}`
+                  : `http://localhost:5001${product.image}`
               }
               alt="Preview"
               className="mx-auto w-32 h-32 object-cover rounded"

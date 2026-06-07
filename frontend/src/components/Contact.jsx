@@ -57,7 +57,7 @@ function Contact() {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/contact", formData);
+      const res = await axios.post("http://localhost:5001/api/contact", formData);
 
       showToast(res.data.message || "Message sent successfully!", "success");
 
