@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+const API =
+  import.meta.env.VITE_API_URL ||
+  "https://ishop-backend-a0gx.onrender.com";
+
 const AdminLogin = () => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -17,21 +21,24 @@ const AdminLogin = () => {
     setMessage("");
 
     try {
-      const response = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          emailOrUsername: emailOrUsername.trim(),
-          password: password.trim(),
-        }),
-      });
+      const response = await fetch(
+        `${API}/api/admin/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            emailOrUsername: emailOrUsername.trim(),
+            password: password.trim(),
+          }),
+        }
+      );
 
-      // 🔥 Debug Response
       const text = await response.text();
 
       console.log("================================");
+      console.log("LOGIN API:", `${API}/api/admin/login`);
       console.log("LOGIN RESPONSE STATUS:", response.status);
       console.log("LOGIN RESPONSE BODY:");
       console.log(text);
@@ -40,7 +47,7 @@ const AdminLogin = () => {
       let data = {};
 
       try {
-        data = JSON.parse(text);
+        data = text ? JSON.parse(text) : {};
       } catch (err) {
         console.error("JSON Parse Error:", err);
       }
@@ -49,6 +56,13 @@ const AdminLogin = () => {
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
+
+        if (data.admin) {
+          localStorage.setItem(
+            "admin",
+            JSON.stringify(data.admin)
+          );
+        }
 
         setMessageType("success");
         setMessage("✅ Login successful! Redirecting...");
@@ -59,7 +73,7 @@ const AdminLogin = () => {
       } else {
         setMessageType("error");
         setMessage(
-          `❌ ${data.message || "Login failed. Check console logs."}`
+          `❌ ${data.message || "Invalid username/email or password"}`
         );
       }
     } catch (err) {
@@ -68,7 +82,7 @@ const AdminLogin = () => {
       console.error("LOGIN FETCH ERROR:", err);
 
       setMessageType("error");
-      setMessage("❌ Server connection failed.");
+      setMessage("❌ Unable to connect to server.");
     }
   };
 
@@ -81,7 +95,7 @@ const AdminLogin = () => {
 
         {message && (
           <div
-            className={`mb-4 p-3 rounded-lg text-white text-center ${
+            className={`mb-4 p-3 rounded-lg text-center text-white ${
               messageType === "success"
                 ? "bg-green-600"
                 : "bg-red-600"
@@ -117,7 +131,9 @@ const AdminLogin = () => {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
               placeholder="Enter password"
               className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-400"
               required
