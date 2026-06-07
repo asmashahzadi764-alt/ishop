@@ -40,19 +40,29 @@ const Messages = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Fetch messages from backend
+  // ✅ FIXED: Safe fetch + array check
   const fetchMessages = async () => {
     try {
-      // Relative path -> proxied to admin backend
-      const { data } = await axios.get('/api/admin/messages');
-      // Set newBadge based on backend isRead
-      const sorted = data
+      const { data } = await axios.get("/api/admin/messages");
+
+      // 🔥 IMPORTANT FIX: ensure array
+      const msgArray = Array.isArray(data)
+        ? data
+        : data?.messages || [];
+
+      const sorted = msgArray
+        .slice()
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .map((msg) => ({ ...msg, newBadge: !msg.isRead }));
+        .map((msg) => ({
+          ...msg,
+          newBadge: !msg.isRead,
+        }));
+
       setMessages(sorted);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch error:", err);
       showToast("Failed to fetch messages!", "error");
+      setMessages([]); // fallback
     } finally {
       setLoading(false);
     }
@@ -62,19 +72,17 @@ const Messages = () => {
     fetchMessages();
   }, []);
 
-  // Delete message
   const handleDelete = async (id) => {
     try {
       await axios.delete(`/api/admin/messages/${id}`);
       setMessages((prev) => prev.filter((msg) => msg._id !== id));
-      showToast("Message deleted!");
+      showToast("Message deleted!", "success");
     } catch (err) {
       console.error(err);
       showToast("Failed to delete message!", "error");
     }
   };
 
-  // Preview & mark as read
   const handlePreview = async (msg) => {
     setPreviewMessage(msg.message);
 
@@ -93,7 +101,7 @@ const Messages = () => {
         );
       } catch (err) {
         console.error(err);
-        showToast("Failed to mark message as read", "error");
+        showToast("Failed to mark as read", "error");
       }
     }
   };
@@ -106,70 +114,59 @@ const Messages = () => {
         </h1>
 
         {loading ? (
-          <p className="text-center text-gray-600">Loading messages...</p>
+          <p className="text-center">Loading...</p>
         ) : messages.length === 0 ? (
-          <p className="text-center text-gray-600">
-            No messages found from customers yet.
-          </p>
+          <p className="text-center">No messages found</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full table-auto border-collapse border border-gray-200">
+            <table className="min-w-full border">
               <thead className="bg-blue-100">
                 <tr>
                   {["#", "Name", "Email", "Phone", "Message", "Date", "Actions"].map(
-                    (header) => (
-                      <th
-                        key={header}
-                        className="border border-gray-300 px-4 py-2 text-left"
-                      >
-                        {header}
+                    (h) => (
+                      <th key={h} className="border px-4 py-2 text-left">
+                        {h}
                       </th>
                     )
                   )}
                 </tr>
               </thead>
+
               <tbody>
-                {messages.map((msg, index) => (
-                  <tr
-                    key={msg._id}
-                    className={`hover:bg-gray-100 transition duration-200 ${
-                      msg.newBadge ? "bg-green-50 font-semibold" : ""
-                    }`}
-                  >
-                    <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                    <td className="border border-gray-300 px-4 py-2 flex items-center gap-2">
+                {messages.map((msg, i) => (
+                  <tr key={msg._id} className="hover:bg-gray-100">
+                    <td className="border px-4 py-2">{i + 1}</td>
+
+                    <td className="border px-4 py-2 flex gap-2">
                       {msg.name}
                       {msg.newBadge && (
-                        <span className="px-2 py-0.5 text-xs font-semibold text-white bg-green-600 rounded-full animate-pulse">
+                        <span className="bg-green-600 text-white text-xs px-2 rounded-full">
                           NEW
                         </span>
                       )}
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-blue-600">
-                      {msg.email || "—"}
+
+                    <td className="border px-4 py-2">{msg.email || "—"}</td>
+                    <td className="border px-4 py-2">{msg.phone || "—"}</td>
+
+                    <td
+                      className="border px-4 py-2 cursor-pointer"
+                      onClick={() => handlePreview(msg)}
+                    >
+                      <Eye size={14} />{" "}
+                      {msg.message?.slice(0, 50) || "No message"}
                     </td>
-                    <td className="border border-gray-300 px-4 py-2">{msg.phone || "—"}</td>
-                    <td className="border border-gray-300 px-4 py-2 max-w-xs truncate">
-                      <span
-                        className="cursor-pointer hover:text-blue-600 flex items-center gap-1"
-                        title={msg.message}
-                        onClick={() => handlePreview(msg)}
-                      >
-                        <Eye size={16} />
-                        {msg.message.length > 50
-                          ? msg.message.slice(0, 50) + "…"
-                          : msg.message}
-                      </span>
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2 text-gray-500">
+
+                    <td className="border px-4 py-2">
                       {new Date(msg.createdAt).toLocaleString()}
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 flex gap-2">
+
+                    <td className="border px-4 py-2">
                       <button
-                        className="flex items-center gap-1 px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded shadow transition-all"
                         onClick={() => setDeleteTarget(msg._id)}
+                        className="bg-red-600 text-white px-3 py-1 rounded"
                       >
-                        <Trash2 size={16} /> Delete
+                        <Trash2 size={14} /> Delete
                       </button>
                     </td>
                   </tr>
@@ -183,46 +180,26 @@ const Messages = () => {
       {/* Delete Modal */}
       {deleteTarget && (
         <Modal onClose={() => setDeleteTarget(null)}>
-          <p className="mb-4 text-gray-700 text-center">
-            Are you sure you want to delete this message?
-          </p>
-          <div className="flex justify-center gap-4">
-            <button
-              className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
-              onClick={() => setDeleteTarget(null)}
-            >
-              Cancel
-            </button>
-            <button
-              className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-              onClick={async () => {
-                await handleDelete(deleteTarget);
-                setDeleteTarget(null);
-              }}
-            >
-              Delete
-            </button>
-          </div>
+          <p>Delete this message?</p>
+          <button
+            onClick={async () => {
+              await handleDelete(deleteTarget);
+              setDeleteTarget(null);
+            }}
+            className="bg-red-600 text-white px-4 py-2 mt-3"
+          >
+            Delete
+          </button>
         </Modal>
       )}
 
       {/* Preview Modal */}
       {previewMessage && (
         <Modal onClose={() => setPreviewMessage(null)}>
-          <h2 className="text-lg font-semibold mb-4">Full Message</h2>
-          <p className="text-gray-700 whitespace-pre-wrap">{previewMessage}</p>
-          <div className="text-right mt-4">
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              onClick={() => setPreviewMessage(null)}
-            >
-              Close
-            </button>
-          </div>
+          <p>{previewMessage}</p>
         </Modal>
       )}
 
-      {/* Toast */}
       {toast && <Toast message={toast.message} type={toast.type} />}
     </section>
   );
