@@ -57,8 +57,9 @@ function Contact() {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5001/api/contact", formData);
+         const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
+         const res = await axios.post(`${API_URL}/api/contact`, formData);
       showToast(res.data.message || "Message sent successfully!", "success");
 
       // Clear form
