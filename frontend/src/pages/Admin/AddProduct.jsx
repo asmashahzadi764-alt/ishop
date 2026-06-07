@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const API =
+  import.meta.env.VITE_API_URL ||
+  "https://ishop-backend-a0gx.onrender.com";
+
 const AddProduct = () => {
   const [product, setProduct] = useState({
     name: "",
@@ -10,13 +14,12 @@ const AddProduct = () => {
     category: "",
   });
 
-  const [file, setFile] = useState(null); // For local file
+  const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProduct((prev) => ({ ...prev, [name]: value }));
+    setProduct({ ...product, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e) => {
@@ -28,13 +31,6 @@ const AddProduct = () => {
     setMessage("");
     setLoading(true);
 
-    // Validation: name, price, category, and either URL or file required
-    if (!product.name || !product.price || (!product.image && !file) || !product.category) {
-      setMessage("⚠️ Please fill all required fields!");
-      setLoading(false);
-      return;
-    }
-
     try {
       const formData = new FormData();
       formData.append("name", product.name);
@@ -42,23 +38,36 @@ const AddProduct = () => {
       formData.append("description", product.description);
       formData.append("category", product.category);
 
-      // Append either file or URL
       if (file) {
         formData.append("imageFile", file);
       } else {
         formData.append("image", product.image);
       }
 
-      const response = await axios.post("http://localhost:5001/api/products", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const { data } = await axios.post(
+        `${API}/api/products`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       setMessage("✅ Product added successfully!");
-      setProduct({ name: "", price: "", description: "", image: "", category: "" });
+
+      setProduct({
+        name: "",
+        price: "",
+        description: "",
+        image: "",
+        category: "",
+      });
+
       setFile(null);
     } catch (error) {
-      console.error("Error:", error);
-      setMessage("❌ Server error. Please check the backend.");
+      console.error(error);
+      setMessage("❌ Failed to add product");
     } finally {
       setLoading(false);
     }
@@ -66,19 +75,21 @@ const AddProduct = () => {
 
   return (
     <section className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-xl mx-auto bg-white shadow-xl rounded-2xl p-8">
-        <h2 className="text-3xl font-bold text-center text-blue-600 mb-6">
-          ➕ Add New Product
+      <div className="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+
+        <h2 className="text-3xl font-bold text-blue-600 text-center mb-6">
+          ➕ Add Product
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+
           <input
             type="text"
             name="name"
             placeholder="Product Name"
             value={product.name}
             onChange={handleChange}
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+            className="w-full border p-3 rounded"
             required
           />
 
@@ -88,24 +99,24 @@ const AddProduct = () => {
             placeholder="Price"
             value={product.price}
             onChange={handleChange}
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+            className="w-full border p-3 rounded"
             required
           />
 
           <input
             type="text"
             name="image"
-            placeholder="Image URL"
+            placeholder="Image URL (optional)"
             value={product.image}
             onChange={handleChange}
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+            className="w-full border p-3 rounded"
           />
 
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+            className="w-full border p-3 rounded"
           />
 
           <textarea
@@ -113,70 +124,58 @@ const AddProduct = () => {
             placeholder="Description"
             value={product.description}
             onChange={handleChange}
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-            rows={4}
-          ></textarea>
+            className="w-full border p-3 rounded"
+          />
 
           <select
             name="category"
             value={product.category}
             onChange={handleChange}
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+            className="w-full border p-3 rounded"
             required
           >
-            <option value="">-- Select Category --</option>
+            <option value="">Select Category</option>
             <option value="iphone">iPhone</option>
             <option value="ipad">iPad</option>
-            <option value="imac">iMac</option>
             <option value="macbook">MacBook</option>
+            <option value="imac">iMac</option>
             <option value="airpods">AirPods</option>
             <option value="applewatch">Apple Watch</option>
             <option value="appletv">Apple TV</option>
             <option value="accessories">Accessories</option>
-            <option value="entertainment">Entertainment</option>
           </select>
 
           <button
             type="submit"
             disabled={loading}
-            className={`w-full text-white px-6 py-3 rounded-lg transition ${
-              loading
-                ? "bg-blue-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
+            className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700"
           >
-            {loading ? "Adding Product..." : "Add Product"}
+            {loading ? "Adding..." : "Add Product"}
           </button>
         </form>
 
+        {/* MESSAGE */}
         {message && (
-          <p
-            className={`text-center text-lg font-semibold mt-4 ${
-              message.includes("✅")
-                ? "text-blue-600"
-                : message.includes("⚠️")
-                ? "text-yellow-600"
-                : "text-red-600"
-            }`}
-          >
+          <p className="text-center mt-4 font-semibold">
             {message}
           </p>
         )}
 
-        {/* ✅ Preview uploaded image */}
+        {/* IMAGE PREVIEW */}
         {(file || product.image) && (
-          <div className="mt-4 text-center">
+          <div className="mt-5 text-center">
             <p className="font-semibold mb-2">Preview:</p>
+
             <img
               src={
                 file
                   ? URL.createObjectURL(file)
                   : product.image.startsWith("http")
                   ? product.image
-                  : `http://localhost:5001${product.image}`
+                  : `${API}${product.image}`
               }
-              alt="Preview"
-              className="mx-auto w-32 h-32 object-cover rounded"
+              className="w-32 h-32 object-cover mx-auto rounded"
+              alt="preview"
             />
           </div>
         )}
