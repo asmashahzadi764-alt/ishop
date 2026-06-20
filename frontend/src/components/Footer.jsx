@@ -191,26 +191,7 @@ const Footer = () => {
               asmashahzadi764@gmail.com
             </a>
           </p>
-
-          <p>
-            <span className="font-semibold text-white">Iqra Shahzadi</span> —
-            <a
-              href="https://www.linkedin.com/in/iqra-shahzadi-689496387/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 ml-1 hover:underline"
-            >
-              LinkedIn
-            </a>
-            <br />
-            Email:
-            <a
-              href="mailto:iqraiqrashahzadi355@gmail.com"
-              className="text-blue-400 hover:underline ml-1"
-            >
-              iqraiqrashahzadi355@gmail.com
-            </a>
-          </p>
+          
         </div>
       </motion.div>
     </footer>
