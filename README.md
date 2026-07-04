@@ -1,6 +1,10 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=180&section=header&text=🛒%20iShop&fontSize=52&fontColor=fff&animation=twinkling&fontAlignY=32&desc=Full-Stack%20E-Commerce%20%2B%20Admin%20Dashboard%20System&descAlignY=55&descSize=17"/>
+# 🛒 iShop
+
+### Full-Stack E-Commerce + Admin Dashboard System
+
+A modern MERN-based e-commerce application featuring a responsive shopping experience, secure JWT authentication, product management, contact management, and a production-ready REST API.
 
 </div>
 
@@ -251,19 +255,6 @@ npm run dev
 
 ---
 
-## 🌱 Future Improvements
-
-| Feature | Status |
-|--------|--------|
-| 💳 Payment gateway (Stripe / EasyPaisa) | 📅 Planned |
-| 📦 Order management system | 📅 Planned |
-| 👥 User authentication system | 📅 Planned |
-| 🛒 Wishlist & cart system | 📅 Planned |
-| 📧 Email notifications | 📅 Planned |
-| 📊 Advanced analytics dashboard | 📅 Planned |
-
----
-
 ## 👩‍💻 Author
 
 <div align="center">
@@ -279,8 +270,3 @@ Full Stack Developer
 
 ---
 
-<div align="center">
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=100&section=footer&animation=twinkling"/>
-
-</div>
